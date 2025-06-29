@@ -81,26 +81,38 @@ def update():
     # TODO Part 1: Modify the following conditional statement such that when the
     # right trigger is pressed, the RACECAR moves forward at the designated speed.
     # when the left trigger is pressed, the RACECAR moves backward at the designated speed.
-    if rc.controller.get_trigger(rc.controller.Trigger._____) > _____:
-        speed = _____
-    elif rc.controller.get_trigger(rc.controller.Trigger._____) > _____:
-        speed = _____
+    if rc.controller.get_trigger(rc.controller.Trigger.RIGHT) > 0:
+        speed = rc.controller.get_trigger(rc.controller.Trigger.RIGHT)
+    elif rc.controller.get_trigger(rc.controller.Trigger.LEFT) > 0:
+        speed = -rc.controller.get_trigger(rc.controller.Trigger.LEFT)
     else:
         speed = 0
       
     # TODO Part 2: Modify the following conditional statement such that when the
     # value of the left joystick's x-axis is greater than 0, the RACECAR's wheels turn right.
     # When the value of the left joystick's x-axis is less than 0, the RACECAR's wheels turn left.
-    (x, y) = rc.controller.get_joystick(rc.controller.Joystick._____)
+    (x, y) = rc.controller.get_joystick(rc.controller.Joystick.LEFT)
     if x > 0.5:
-        angle = _____
+        angle = x
     elif x < -0.5:
-        angle = -_____
+        angle = x
     else:
         angle = 0
 
+    if rc.controller.was_pressed(rc.controller.Button.A):
+        speed += speed_offset
+        print(f"Current speed: {speed}")
+    elif rc.controller.was_pressed(rc.controller.Button.B):
+        speed -= speed_offset
+        print(f"Current speed: {speed}")
     # TODO Part 3: Write a conditional statement such that when the
     # "A" button is pressed, increase the speed of the RACECAR. When the "B" button is pressed,
+    if rc.controller.was_pressed(rc.controller.Button.X):
+        angle += angle_offset
+        print(f"Current angle: {angle}")
+    elif rc.controller.was_pressed(rc.controller.Button.Y):
+        angle -= angle_offset
+        print(f"Current angle: {angle}")
     # decrease the speed of the RACECAR. Print the current speed of the RACECAR to the
     # terminal window.
 

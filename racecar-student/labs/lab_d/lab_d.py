@@ -95,10 +95,10 @@ def update():
 
     # If the queue is not empty, follow the current drive instruction
     if len(queue) > 0:
-        speed = _____
-        angle = _____
-        queue[_][_] -= rc.get_delta_time()
-        if queue[_][_] <= 0:
+        speed = queue[0][1]
+        angle = queue[0][2]
+        queue[0][0] -= rc.get_delta_time()
+        if queue[0][0] <= 0:
             queue.pop(0)
 
     # Send speed and angle commands to the RACECAR
@@ -118,6 +118,11 @@ def drive_zigzag():
     # for the RACECAR to drive in the "Zigzag" obstacle course
     # [Hint] queue.append([time, speed, angle])
 
+    queue.append([1.0, 1.0, 1.0])
+    queue.append([1.0, 1.0, -1.0])
+    queue.append([1.0, 1.0, 1.0])
+    queue.append([1.0, 1.0, -1.0])
+    queue.append([1.0, 0.0, 0.0])
 
 # [FUNCTION] When the function is called, clear the queue, then place instructions
 # inside of the queue that cause the RACECAR to drive in the spiral
@@ -126,16 +131,37 @@ def drive_spiral():
 
     # Use this section to define and tune static variables
 
+    queue.append([1.0, 0.5, 1.0])
+    queue.append([1.0, 0.6, 0.8])
+    queue.append([1.0, 0.7, 0.6])
+    queue.append([1.0, 0.8, 0.4])
+    queue.append([1.0, 0.9, 0.2])
+    queue.append([1.0, 1.0, 0.0])
+    queue.append([1.0, 0.0, 0.0])
     queue.clear()
 
     # TODO Part 3: Append the instructions into the queue that represent the RACECAR
     # driving in the "Spiral" obstacle course
 
+    queue.append([2.0, 1.0, 0.0])
+    queue.append([0.5, 0.0, 0.5])
+    queue.append([2.0, 1.0, 0.0])
+    queue.append([0.5, 0.0, -0.5])
+    queue.append([2.0, 1.0, 0.0])
+    queue.append([1.0, 0.0, 0.0])
 
 # [FUNCTION] When the function is called, clear the queue, then place instructions 
 # inside of the queue that cause the RACECAR to drive through the hallway
 def drive_hallway():
     global queue
+    queue.append([1.0, 1.0, 0.0])
+    queue.append([0.5, 0.0, 1.0])
+    queue.append([1.0, 1.0, 0.0])
+    queue.append([0.5, 0.0, -1.0])
+    queue.append([1.0, 1.0, 0.0])
+    queue.append([0.5, 0.0, 1.0])
+    queue.append([1.0, 1.0, 0.0])
+    queue.append([1.0, 0.0, 0.0])
 
     # TODO Part 4: Create constants that represent the RACECAR driving through
     # the "Hallway" obstacle course, and then append the instructions in the

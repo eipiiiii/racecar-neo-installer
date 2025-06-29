@@ -50,7 +50,7 @@ rc = racecar_core.create_racecar()
 MIN_CONTOUR_AREA = 30
 
 # TODO Part 1: Determine the HSV color threshold pairs for ORANGE
-ORANGE = _____  # The HSV range for the color ORANGE
+ORANGE = ((10, 100, 100), (25, 255, 255))  # The HSV range for the color ORANGE
 
 # >> Variables
 speed = 0.0  # The current speed of the car
@@ -71,9 +71,28 @@ def update_contour():
 
     image = rc.camera.get_color_image()
 
-    # TODO Part 2: Complete this function by cropping the image to the bottom of the screen,
-    # analyzing for contours of interest, and returning the center of the contour and the
-    # area of the contour for the color of line we should follow (Hint: Lab 3)
+    if image is None:
+        contour_center = None
+        contour_area = 0
+    else:
+        # Crop the image to the bottom of the screen
+        cropped_image = rc_utils.crop(image, (image.shape[0] // 2, 0), (image.shape[0], image.shape[1]))
+
+        # Find contours of the orange cone
+        contours = rc_utils.find_contours(cropped_image, ORANGE[0], ORANGE[1])
+
+        # Select the largest contour
+        cone_contour = rc_utils.get_largest_contour(contours, MIN_CONTOUR_AREA)
+
+        if cone_contour is not None:
+            contour_center = rc_utils.get_contour_center(cone_contour)
+            contour_area = rc_utils.get_contour_area(cone_contour)
+        else:
+            contour_center = None
+            contour_area = 0
+
+    # Display the image to the screen
+    rc.display.show_color_image(image)
 
 
 # [FUNCTION] The start function is run once every time the start button is pressed
@@ -111,10 +130,26 @@ def update():
     # Search for contours in the current color image
     update_contour()
 
-    # TODO Part 3: Park the car 30cm away from the closest orange cone.
-    # You may use a state machine and a combination of sensors (color camera,
-    # or LIDAR to do so). Depth camera is not allowed at this time to match the
-    # physical RACECAR Neo.
+    # State machine for parking
+    global speed
+    global angle
+
+    if contour_center is not None:
+        # Cone detected, approach it
+        angle = rc_utils.remap_range(contour_center[1], 0, rc.camera.get_width(), -1, 1)
+        
+        # Get the distance to the closest object in front of the car
+        lidar_distances = rc.lidar.get_distances()
+        front_distance = rc_utils.get_lidar_closest_point(lidar_distances, (350, 10)) # Check 10 degrees to the left and right of straight ahead
+
+        if front_distance > 30: # If further than 30cm, drive forward
+            speed = 0.5
+        else: # If within 30cm, stop
+            speed = 0.0
+    else:
+        # No cone detected, stop
+        speed = 0.0
+        angle = 0.0
 
     # Set the speed and angle of the RACECAR after calculations have been complete
     rc.drive.set_speed_angle(speed, angle)

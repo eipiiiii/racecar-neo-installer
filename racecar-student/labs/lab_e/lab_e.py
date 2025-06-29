@@ -59,16 +59,16 @@ rc = racecar_core.create_racecar()
 
 # >> Constants
 # The smallest contour we will recognize as a valid contour (Adjust threshold!)
-MIN_CONTOUR_AREA = ___
+MIN_CONTOUR_AREA = 30
 
 # TODO Part 1: Determine the HSV color threshold pairs for ORANGE, GREEN, RED, YELLOW, and PURPLE
 # Colors, stored as a pair (hsv_min, hsv_max)
 BLUE = ((90, 50, 50), (120, 255, 255))  # The HSV range for the color blue
-GREEN = _____  # The HSV range for the color green
-RED = _____  # The HSV range for the color red
-ORANGE = _____ # The HSV range for the color orange
-YELLOW = _____ # The HSV range for the color yellow
-PURPLE = _____ # The HSV range for the color purple
+GREEN = ((40, 50, 50), (80, 255, 255))  # The HSV range for the color green
+RED = ((170, 50, 50), (10, 255, 255))  # The HSV range for the color red
+ORANGE = ((10, 50, 50), (25, 255, 255)) # The HSV range for the color orange
+YELLOW = ((25, 50, 50), (35, 255, 255)) # The HSV range for the color yellow
+PURPLE = ((130, 50, 50), (160, 255, 255)) # The HSV range for the color purple
 
 # >> Variables
 contour_center = None  # The (pixel row, pixel column) of contour
@@ -93,11 +93,67 @@ def update_contour():
         contour_center = None
         contour_area = 0
     else:
-        # TODO Part 2: Search for line colors, and update the global variables
-        # contour_center and contour_area with the largest contour found
+        # Search for blue
+        contours_blue = rc_utils.find_contours(image, BLUE[0], BLUE[1])
+        contour_blue = rc_utils.get_largest_contour(contours_blue, MIN_CONTOUR_AREA)
 
-        # TODO Part 3: Repeat the search for all potential traffic light colors,
-        # then select the correct color of traffic light detected.
+        # Search for orange
+        contours_orange = rc_utils.find_contours(image, ORANGE[0], ORANGE[1])
+        contour_orange = rc_utils.get_largest_contour(contours_orange, MIN_CONTOUR_AREA)
+
+        # Search for green
+        contours_green = rc_utils.find_contours(image, GREEN[0], GREEN[1])
+        contour_green = rc_utils.get_largest_contour(contours_green, MIN_CONTOUR_AREA)
+
+        # Search for red
+        contours_red = rc_utils.find_contours(image, RED[0], RED[1])
+        contour_red = rc_utils.get_largest_contour(contours_red, MIN_CONTOUR_AREA)
+
+        # Search for yellow
+        contours_yellow = rc_utils.find_contours(image, YELLOW[0], YELLOW[1])
+        contour_yellow = rc_utils.get_largest_contour(contours_yellow, MIN_CONTOUR_AREA)
+
+        # Search for purple
+        contours_purple = rc_utils.find_contours(image, PURPLE[0], PURPLE[1])
+        contour_purple = rc_utils.get_largest_contour(contours_purple, MIN_CONTOUR_AREA)
+
+        # Determine the largest contour and its color
+        largest_contour = None
+        largest_area = 0
+        global stoplight_color
+
+        if contour_blue is not None and rc_utils.get_contour_area(contour_blue) > largest_area:
+            largest_contour = contour_blue
+            largest_area = rc_utils.get_contour_area(contour_blue)
+            stoplight_color = "BLUE"
+        if contour_orange is not None and rc_utils.get_contour_area(contour_orange) > largest_area:
+            largest_contour = contour_orange
+            largest_area = rc_utils.get_contour_area(contour_orange)
+            stoplight_color = "ORANGE"
+        if contour_green is not None and rc_utils.get_contour_area(contour_green) > largest_area:
+            largest_contour = contour_green
+            largest_area = rc_utils.get_contour_area(contour_green)
+            stoplight_color = "GREEN"
+        if contour_red is not None and rc_utils.get_contour_area(contour_red) > largest_area:
+            largest_contour = contour_red
+            largest_area = rc_utils.get_contour_area(contour_red)
+            stoplight_color = "RED"
+        if contour_yellow is not None and rc_utils.get_contour_area(contour_yellow) > largest_area:
+            largest_contour = contour_yellow
+            largest_area = rc_utils.get_contour_area(contour_yellow)
+            stoplight_color = "YELLOW"
+        if contour_purple is not None and rc_utils.get_contour_area(contour_purple) > largest_area:
+            largest_contour = contour_purple
+            largest_area = rc_utils.get_contour_area(contour_purple)
+            stoplight_color = "PURPLE"
+
+        if largest_contour is not None:
+            contour_center = rc_utils.get_contour_center(largest_contour)
+            contour_area = largest_area
+        else:
+            contour_center = None
+            contour_area = 0
+            stoplight_color = ""
 
         # Display the image to the screen
         rc.display.show_color_image(image)
@@ -129,15 +185,27 @@ def update():
     update_contour()
 
     # TODO Part 2: Complete the conditional tree with the given constraints.
-    if stoplight_color == "_____":
-        # Call the correct function to append the instructions to the list
-    elif stoplight_color == "_____":
-        # Call the correct function to append the instructions to the list
-    
-    # ... You may need more elif/else statements
+    if stoplight_color == "BLUE":
+        turnRight()
+    elif stoplight_color == "ORANGE":
+        turnLeft()
+    elif stoplight_color == "GREEN":
+        goStraight()
+    elif stoplight_color == "RED":
+        stopNow()
+    else:
+        stopNow()
 
     # TODO Part 3: Implement a way to execute instructions from the queue once they have been placed
     # by the traffic light detector logic (Hint: Lab 2)
+    speed = 0
+    angle = 0
+    if len(queue) > 0:
+        speed = queue[0][1]
+        angle = queue[0][2]
+        queue[0][0] -= rc.get_delta_time()
+        if queue[0][0] <= 0:
+            queue.pop(0)
 
     # Send speed and angle commands to the RACECAR
     rc.drive.set_speed_angle(speed, angle)
@@ -157,19 +225,26 @@ def update():
 def turnRight():
     global queue
 
-    # TODO Part 4: Complete the rest of this function with the instructions to make a right turn
+    queue.clear()
+    queue.append([0.5, 0.5, 0.0]) # Drive forward a bit
+    queue.append([1.0, 0.0, 1.0]) # Turn right
+    queue.append([1.0, 0.5, 0.0]) # Drive straight
 
 # [FUNCTION] Appends the correct instructions to make a 90 degree left turn to the queue
 def turnLeft():
     global queue
 
-    # TODO Part 5: Complete the rest of this function with the instructions to make a left turn
+    queue.clear()
+    queue.append([0.5, 0.5, 0.0]) # Drive forward a bit
+    queue.append([1.0, 0.0, -1.0]) # Turn left
+    queue.append([1.0, 0.5, 0.0]) # Drive straight
 
 # [FUNCTION] Appends the correct instructions to go straight through the intersectionto the queue
 def goStraight():
     global queue
 
-    # TODO Part 6: Complete the rest of this function with the instructions to make a left turn
+    queue.clear()
+    queue.append([1.0, 1.0, 0.0]) # Drive straight
 
 # [FUNCTION] Clears the queue to stop all actions
 def stopNow():

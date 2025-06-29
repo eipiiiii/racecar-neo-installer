@@ -53,8 +53,8 @@ CROP_FLOOR = ((360, 0), (rc.camera.get_height(), rc.camera.get_width()))
 # TODO Part 1: Determine the HSV color threshold pairs for GREEN and RED
 # Colors, stored as a pair (hsv_min, hsv_max) Hint: Lab E!
 BLUE = ((90, 50, 50), (120, 255, 255))  # The HSV range for the color blue
-GREEN = _____  # The HSV range for the color green
-RED = _____  # The HSV range for the color red
+GREEN = ((40, 50, 50), (80, 255, 255))  # The HSV range for the color green
+RED = ((170, 50, 50), (10, 255, 255))  # The HSV range for the color red
 
 # Color priority: Red >> Green >> Blue
 COLOR_PRIORITY = (RED, GREEN, BLUE)
@@ -83,10 +83,20 @@ def update_contour():
         contour_area = 0
     else:
         # Crop the image to the floor directly in front of the car
-        image = rc_utils.crop(image, _____, _____)
+        image = rc_utils.crop(image, CROP_FLOOR[0], CROP_FLOOR[1])
 
-        # TODO Part 2: Search for line colors, and update the global variables
-        # contour_center and contour_area with the largest contour found
+        # Search for contours in the current color image
+        # Prioritize red, then green, then blue
+        for color in COLOR_PRIORITY:
+            contours = rc_utils.find_contours(image, color[0], color[1])
+            contour = rc_utils.get_largest_contour(contours, MIN_CONTOUR_AREA)
+            if contour is not None:
+                contour_center = rc_utils.get_contour_center(contour)
+                contour_area = rc_utils.get_contour_area(contour)
+                break
+        else:
+            contour_center = None
+            contour_area = 0
 
         # Display the image to the screen
         rc.display.show_color_image(image)
@@ -138,7 +148,9 @@ def update():
     # Choose an angle based on contour_center
     # If we could not find a contour, keep the previous angle
     if contour_center is not None:
-        angle = _____
+        # Normalize the x position of the contour center to a range of -1 to 1
+        # (0, 0) is the top-left, (600, 480) is the bottom-right
+        angle = rc_utils.remap_range(contour_center[1], 0, rc.camera.get_width(), -1, 1)
 
     # Use the triggers to control the car's speed
     rt = rc.controller.get_trigger(rc.controller.Trigger.RIGHT)

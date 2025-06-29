@@ -58,8 +58,8 @@ def start():
 
     # TODO Part 1: Modify the variable below to your name. Modify the print statement,
     # such that when run, the program prints "Hello {your name}, welcome to RACECAR!"
-    your_name = "_____"
-    # print(f"Welcome {_____}, welcome to RACECAR!")
+    your_name = "Roo"
+    print(f"Welcome {your_name}, welcome to RACECAR!")
 
 # [FUNCTION] After start() is run, this function is run once every frame (ideally at
 # 60 frames per second or slower depending on processing speed) until the back button
@@ -71,24 +71,26 @@ def update():
     # TODO Part 2: Modify the following if statement's contents to print out "Hello World!"
     # to the terminal window after the "A" button has been pressed on the keyboard.
     if rc.controller.was_pressed(rc.controller.Button.A):
-        print("_____")
+        print("Hello World!")
 
     # TODO Part 3: Modify the following if statement to print out "Welcome to RACECAR
     # <your name>!" after the "B" button has been released on the keyboard.
-    if rc.controller._____(rc.controller.Button._):
-        print(f"Welcome to RACECAR {_____}!")
+    if rc.controller.was_released(rc.controller.Button.B):
+        print(f"Welcome to RACECAR {your_name}!")
 
     # TODO Part 4: Modify the following if statment to print out the current elapsed 
     # time of the script to the terminal window in seconds when the X button is pressed. 
     # The script should continue printing time updates if the button is held down. 
     # Round the time to 2 decimal places.
-    if rc.controller._____(rc.controller.Button._):
-        print(f"The current script has been running for {_____} seconds!")
+    if rc.controller.is_down(rc.controller.Button.X):
+        print(f"The current script has been running for {round(counter, 2)} seconds!")
 
     # TODO Part 5: Create an if statement below to print out the current elapsed
     # time of the script to the terminal window in seconds when the Y button is pressed.
     # The script should only print out the time once after the button has been pressed, 
     # regardless if it is held down or not. Round the time to 2 decimal places.
+    if rc.controller.was_pressed(rc.controller.Button.Y):
+        print(f"The current script has been running for {round(counter, 2)} seconds!")
     
 
 ########################################################################################
